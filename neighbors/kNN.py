@@ -19,8 +19,7 @@ def classify0(inX, dataSet, labels, k):
 
     dataSetSize = dataSet.shape[0]
     #tile , esta funcion me duplica la matrix ejemp:  a = np.array([0, 1, 2])   >> np.tile(a, 2)   >> array([0, 1, 2, 0, 1, 2])
-    diffMat = tile(inX, (dataSetSize, 1)) - dataSet 
-    print diffMat
+    diffMat = tile(inX, (dataSetSize, 1)) - dataSet     
     sqDiffMat = diffMat**2
     sqDistances = sqDiffMat.sum(axis=1)
     distances = sqDistances**0.5
@@ -66,4 +65,35 @@ def autoNorm(dataSet):
     normDataSet = normDataSet/tile(ranges, (m,1))
     return normDataSet, ranges, minVals
         
-        
+   
+def datingClassTest(datingDataMat,datingLabels ):
+    """
+    This funtion calculated, the number of test vectors, and this is used to decide which vectors from normMat will be
+    used for testing and which for training. The two parts are then fed into our original
+    kNN classifier, classify0. Finally, the error rate is calculated and displayed
+    """
+    hoRatio = 0.10
+    datingDataMat, datingLabels = datingDataMat,datingLabels 
+    normMat, ranges, minVals = autoNorm(datingDataMat)    
+    m = normMat.shape[0]    
+    numTestVecs = int(m*hoRatio)    
+    errorCount = 0.0
+    for i in range(numTestVecs):
+        classifierResult = classify0(normMat[i,:], normMat[numTestVecs:m, :],datingLabels[numTestVecs:m],3)
+        print "The classifier came back with: %d, the real answer is: %d" %(classifierResult, datingLabels[i])
+        if (classifierResult != datingLabels[i]): errorCount += 1.0
+    print "the total error rates is %f" % (errorCount/float(numTestVecs))
+    
+    
+def classifyPerson(datingDataMat, datingLabels):
+    """
+    """
+    resultList = ['not at all', 'in small doses', 'in large doses']
+    percenTats = float(raw_input("percentage of time spent playing video games?"))
+    ffMiles = float(raw_input("frequent flier miles earned per year?"))
+    iceCream = float(raw_input("liters of ice cream consumed per year?"))
+    datingDataMat, datingLabels = datingDataMat, datingLabels
+    normMat, ranges, minVals = autoNorm(datingDataMat)
+    inArr = array([ffMiles, percenTats,iceCream])
+    classifierResult = classify0((inArr-minVals)/ranges, normMat, datingLabels, 3)
+    print "You will probably like this person: ", resultList[classifierResult -1]
