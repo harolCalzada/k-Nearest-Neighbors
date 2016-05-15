@@ -32,3 +32,25 @@ def classify0(inX, dataSet, labels, k):
         classCount[voteIlabel] = classCount.get(voteIlabel, 0) +1
     sortedClassCount = sorted(classCount.iteritems(), key=operator.itemgetter(1), reverse = True)
     return sortedClassCount[0][0]
+    
+def file2matrix(filename):
+    """
+    La finalidad de esta función es returnar una matrix de ejemplos y la otra matriz de labels
+    para testear esta función usar el archivo 'datingTestSet2.txt'
+    """
+    fr = open(filename)    
+    arrayOfLines = fr.readlines()
+    numberOfLines =len(arrayOfLines)  
+    #la funcion zeros crea una matriz de puros 0
+    returnMat = zeros((numberOfLines, 3))
+    classLabelVector = []
+    index = 0    
+    for line in arrayOfLines:
+        line = line.strip()        
+        listFromLine= line.split('\t')
+        returnMat[index, :] = listFromLine[0:3]        
+        classLabelVector.append(int(listFromLine[-1]))        
+        index += 1
+    return returnMat, classLabelVector
+        
+        
