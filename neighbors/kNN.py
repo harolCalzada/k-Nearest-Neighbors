@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from os import listdir
 from numpy import *
 import operator
 
@@ -26,10 +27,11 @@ def classify0(inX, dataSet, labels, k):
     #el argsort me ordena respecto a alguna dimension, por defecto agarra la ultima
     sortedDistIndicies = distances.argsort()
     classCount = {}
+
     for i in range(k):
         voteIlabel = labels[sortedDistIndicies[i]]
-        classCount[voteIlabel] = classCount.get(voteIlabel, 0) +1
-    sortedClassCount = sorted(classCount.iteritems(), key=operator.itemgetter(1), reverse = True)
+        classCount[voteIlabel] = classCount.get(voteIlabel, 0) + 1
+    sortedClassCount = sorted(classCount.iteritems(), key=operator.itemgetter(1), reverse=True)
     return sortedClassCount[0][0]
     
 def file2matrix(filename):
@@ -87,6 +89,7 @@ def datingClassTest(datingDataMat,datingLabels ):
     
 def classifyPerson(datingDataMat, datingLabels):
     """
+    This function do some question a compare the results with de dataSet, and return the Classify
     """
     resultList = ['not at all', 'in small doses', 'in large doses']
     percenTats = float(raw_input("percentage of time spent playing video games?"))
@@ -97,3 +100,52 @@ def classifyPerson(datingDataMat, datingLabels):
     inArr = array([ffMiles, percenTats,iceCream])
     classifierResult = classify0((inArr-minVals)/ranges, normMat, datingLabels, 3)
     print "You will probably like this person: ", resultList[classifierResult -1]
+    
+    
+def img2vector(filename):
+    returnVect = zeros((1,1024))
+    fr = open(filename)
+    for i in range(32):
+        lineStr = fr.readline()
+        for j in range(32):
+            returnVect[0,32*i+j] = int(lineStr[j])
+    return returnVect
+    
+    
+def handwritingClassTest(trainingDigits, path_training_digits):
+    """
+
+    :param trainingDigits:  List of files to trainit set
+    :param path_training_digits: path of directory containing the dataset
+    :return: a test and erros rate
+    """
+    hwLabels = []
+    trainingFileList = trainingDigits           #load the training set
+    m = len(trainingFileList)
+    trainingMat = zeros((m,1024))
+    for i in range(m):
+        """
+        This loop return a list of labels [1,2,3..]
+        """
+        fileNameStr = trainingFileList[i]
+        fileStr = fileNameStr.split('.')[0]
+        classNumStr = int(fileStr.split('_')[0])
+        hwLabels.append(classNumStr)
+        trainingMat[i, :] = img2vector(path_training_digits + fileNameStr)
+    testFileList = trainingDigits      #iterate through the test set
+    errorCount = 0.0
+    mTest = len(testFileList)
+    for i in range(mTest):
+        fileNameStr = testFileList[i]
+        fileStr = fileNameStr.split('.')[0]     #take off .txt
+        classNumStr = int(fileStr.split('_')[0])
+        vectorUnderTest = img2vector(path_training_digits + fileNameStr)
+        classifierResult = classify0(vectorUnderTest, trainingMat, hwLabels, 3)
+        print "the classifier came back with: %d, the real answer is: %d" % (classifierResult, classNumStr)
+        if (classifierResult != classNumStr): errorCount += 1.0
+    print "\nthe total number of errors is: %d" % errorCount
+    print "\nthe total error rate is: %f" % (errorCount/float(mTest))
+            
+        
+    
+
